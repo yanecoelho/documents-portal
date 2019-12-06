@@ -4,136 +4,104 @@ title: Avaliação de Desempenho | Aministrador
 sidebar_label: Administrador
 ---
 
-## Como faço para responder minha autoavaliação?
+## Como saber quem ainda não respondeu a uma avaliação de desempenho?
 
-This endpoint supports creating or updating `Areas`. 
+Dentro da plataforma temos duas opções para que você possa acompanhar o status das avaliações. Acesse menu Desempenho > Avaliações > selecione a avaliação que deseja saber o status e em seguida clique em Detalhes. 
 
-Area is the smallest unit of a group of colleagues working with a single purpose. Traditionally `Areas` have a dedicated manager, however the platform supports areas without a manager.  
-
-This API was intentionally designed with idea that it will first try find and update existing Areas and only when no existing Area is found a new one will be created. 
-
-This design allows this API to be regularly be called by your company. With this API you have a single endpoint that can handle multiple scenarios such as: Create new Area, update Area details (name for example), or even disable Area.
-
-When calling this API must design your code to pass the latest, most updated area information. If an existing Area is found, *using the primary keys*, the area will be updated. Only when no existing Area is found the API will create a new area.
-
-### Batch Operations
-
-This endpoint supports `batch` operations and as such expects **an array of areas** (*in the format of an array of objects*). Each object must contain the Area details:
-
-```json
-areas: [
- { "name": "Area 1", ... },
- { "name": "Area 2", "address": "56, 3rd Ave, New York, NY 10003", ... },
- { "name": "Area 3", "responsibles": ["507f1f77bcf86cd799439011"], "allowCandidatesApply": true, ... },
- ...
-]
-```
-
-If you need to create or update just one area you can call the API with just one area in the array object:
-
-```json
-areas: [ { "name": "area 1", "active": true, ... },]
-```
+Na aba status você têm uma visualização do status geral, acompanhando quantas pessoas do total já concluíram o processo assim como o status de cada fase de um usuário ainda está pendente ou concluída. 
 
 
-### Response and Error reporting
 
-For each request the API will evaluate each area individually and will report errors per area. This means that this API can successfully create or update some areas while rejecting others.
-
-Response example for a request without errors:
-```json
-{
-    "status": "OK",
-    "message": "Created 10 | Updated 105 | Errors 0",
-    "errors": []
-}
-```
-
-Response example for a request **with errors**. In the example bellow the `area` field was incorrectly set as `areaname`, since this field is required the API returned a error for this area.
-```json
-{
-    "status": "OK",
-    "message": "Created 3 | Updated 2 | Errors 1",
-    "errors": [
-        {
-        "object": {
-            "name": "Area Name",
-            ...
-        },
-        "message": "Missing name field"
-    }
-}
-```
-
-## Idempotent Primary Keys
-
-Primary keys fields define if areas will be updated or created. In simple terms: If one of the primary keys in the area payload is found in the area database the area will be updated. 
-
-New areas are created only when none of the provided keys is found.
-
-Primary key fields:
-- `areaId` - The associated unique Id of this Area.
-- `correlation.areaId` - The area employeeId in the context of your company. You can use any key here as long you can control it.
-
-Notes:
-- Primary keys are not required, however when no primary keys are defined a new area will be created upon each request.
-- Calling a API with the same payload a second time (ie. same keys) will not create a new area, it will update the previously created area.
-
-## Available Fields per Area
-
-The only required fields are `name` and one of the primary key fields; We strongly recommend that you use additional keys to control how areas are created, otherwise this can lead to duplicated areas.
+Na aba Solicitações, é possível filtrar apenas as avaliações que ainda esperam o avaliador. Acompanhe quem é o avaliador, avaliado e o status de cada uma das fases da sua avaliação.
 
 
-#### `id` [AreaId] 
-Unique identification number for this Area. This field is option, if not provided a new unique field will be created.
-This field is a *primary key* and should be used whenever this area needs to be updated.
+Dica!! Selecione os usuários que ainda estão pendentes na avaliação e envie mensagem para o avaliador diretamente da plataforma. 
 
-#### `name` [String] 
-The area name. This field is required. 
 
-#### `businessDivision` [[BusinessDivisionId]]
 
-Business Division that this Area Belongs. Area can only belong to one Business Division. 
 
-> This field will also be used as **primary key** to detect if areas will be created or updated.
 
-#### `title` [String]
-The area job post title. 
 
-#### `active` [{`true`,`false`}]
+## Como acompanho o status de respostas da avaliação de desempenho?
 
-This field defines if the Area is active or not. Valid options are `true`, `false`. 
 
-This field is not required, if not provided defaults to `active`.
+Temos três formas de acompanhar a progressão das respostas de uma avaliação. Acesse menu **Desempenho > Avaliações > selecione a avaliação que deseja acompanhar > aba Status**. Por este caminho você tem um panorama geral do status. Qual o percentual de respostas concluídas em cada fase e também uma lista dos colaboradores indicando qual o status de cada fase, concluída ou pendente.
 
-#### `parent` [[GroupId]]
 
-Parent Area that this Area belongs to. This allows creating complex hierarquies.
+Se precisar da relação apenas de pessoas que responderam ou apenas das que estão pendentes, acesse menu **Desempenho > Avaliações > selecione a avaliação que deseja acompanhar > aba Solicitações**. Filtre pelo status "Esperando Avaliador" e o sistema trará todos os colaboradores que estão com o status pendente em alguma fase da avaliação. 
 
-Needs to be a valid `AreaId`.
 
-Note the API will test for circlular references, this means that a child cannot be a parent to another area, even in a nested chain.
+Disponibilizamos o status das respostas também do export da avaliação. Acesse menu **Desempenho > Avaliações > selecione a avaliação que deseja acompanhar > clique em Exportar**.
 
-#### `businessDivision` [BusinessDivisionID]
 
-This field defines the Business Division of area. This needs to be a valid Business Division ID.
+Dentro do documento exportado, na aba Solicitações, estão disponíveis o status de respostas da avaliação.
 
-#### `managers` [[UserId]
 
-This field defines the Users that Are responsible for this Area. 
 
-This field expects an array of users in the format `managers: ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439011"]`. 
 
-#### `address` [String]
+## Quando poderei ver as notas das avaliações dos colaboradores da minha empresa?
 
-This field defines the Area that this area belongs. This fields expects a valid `AreaID`
 
-#### `allowCandidatesApply` [{`true`,`false`}]
+À medida que seus colaboradores forem respondendo à avaliação de desempenho você pode acompanhar as notas acessando menu **Desempenho > Avaliações > selecione a avaliação que deseja acompanhar > Detalhes > aba Avaliação**. A nota dada em cada fase da avaliação estará disponível junto com o nome do usuário. 
 
-If your company have the ATS module enable it will list this area as public places that candidates can apply to. This field is not required, when not provided defaults `false`.
+Você também pode filtrar por cargo, área, unidade de negócio e ordenar o resultado como preferir.
 
-#### `tags` [[String]]
+Ainda na aba Avaliação, além das notas o admin tem acesso ao relatório individual completo do colaborador. 
 
-Arbitrary tags associated with this Area. 
+Visão gráfica do relatório individual:
 
-Tags can also be expressed in key value format, when using `:`. Tags that uses the format of `key:value`, enhancing reports and statics. Example: `project:secret`, `status:new`, `sap:yes`
+As médias e justificativas de cada seção estão disponíveis no relatório. Vale lembrar que as justificativas não vem identificadas por quem a escreveu. Todas as justificativas que o colaborador recebeu nas diferentes fases da avaliação por diferentes avaliadores são compiladas em um só lugar em identificação.
+
+
+
+
+
+
+## Quando o colaborador verá as notas da avaliação?
+
+Para configurar quando o colaborador poderá ver suas notas acesse menu Desempenho > Avaliações > Selecione a avaliação que deseja configurar > aba Ajustes. Para configurar a divulgação do relatório individual completo para o colaborador, altere a "Data de lançamento das notas finais e relatórios" para a data em que deseja disponibilizar para o usuário. 
+
+Você também pode escolher divulgar apenas a nota das fases separadamente. Na mesma página, configure a data de divulgação de cada fase da sua avaliação para a cada que você deseja que seu colaborador possa ver a nota que ele se deu na autoavaliação ou recebeu do gestor, por exemplo. 
+
+
+
+
+## Como adiciono novo colaborador na plataforma?
+
+
+
+
+**I) Convidar usuário para que ele se cadastre na plataforma
+
+No canto superior à direita, clique em **Convidar Usuário. 
+
+
+
+
+
+Você precisa apenas do e-mail do colaborador para cadastrá-lo. Ele receberá um e-mail para que possa completar o cadastro.
+
+**II) +Adicionar usuário inserindo dados completos
+
+Adicionar novos colaboradores na feedback: https://vimeo.com/321265324/b07f69d398
+
+Acesse menu **Permissões > Usuários > +Adicionar usuário.
+
+
+
+Recomendamos esse caminho quando  administrador da plataforma possui os dados completos do colaborador. Se você optar por definir a senha inicial para o usuário, fique tranquilo, assim que ele fizer o primeiro login será pedido para que ele defina uma nova senha.
+
+
+
+**III) Por carga
+
+Em algumas situações é preciso cadastrar um número considerável de novos colaborador de uma só vez. Nesse caso o cadastro de novos usuários pode ser feito via carga. Baixe o template disponível em menu Permissões > Usuários > aba Importar. Preencha os dados sem alterar nome, inserir nem eliminar nenhuma coluna no template.
+
+
+
+
+**Como dou permissão de administrador para um usuário?
+
+Acesse menu Permissão > Usuários > selecione o usuário que deseja > aba Permissões. Marque o campo "ativo" para conceder privilégio de administrador da plataforma para um usuário.
+
+
